@@ -28,16 +28,6 @@ public class Command_whohas extends FreedomCommand
 
         final String materialName = args[0];
         Material material = Material.matchMaterial(materialName);
-        if (material == null)
-        {
-            try
-            {
-                material = DepreciationAggregator.getMaterial(Integer.parseInt(materialName));
-            }
-            catch (NumberFormatException ex)
-            {
-            }
-        }
 
         if (material == null)
         {

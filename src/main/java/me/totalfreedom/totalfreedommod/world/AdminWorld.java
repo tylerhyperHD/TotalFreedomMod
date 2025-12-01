@@ -68,11 +68,12 @@ public final class AdminWorld extends CustomWorld
         world.setSpawnLocation(0, 50, 0);
 
         final Block welcomeSignBlock = world.getBlockAt(0, 50, 0);
-        welcomeSignBlock.setType(Material.SIGN_POST);
+        welcomeSignBlock.setType(Material.OAK_SIGN);
         org.bukkit.block.Sign welcomeSign = (org.bukkit.block.Sign) welcomeSignBlock.getState();
 
-        org.bukkit.material.Sign signData = (org.bukkit.material.Sign) welcomeSign.getData();
-        signData.setFacingDirection(BlockFace.NORTH);
+        org.bukkit.block.data.type.Sign signData = (org.bukkit.block.data.type.Sign) welcomeSign.getBlockData();
+        signData.setRotation(BlockFace.NORTH);
+        welcomeSign.setBlockData(signData);
 
         welcomeSign.setLine(0, ChatColor.GREEN + "AdminWorld");
         welcomeSign.setLine(1, ChatColor.DARK_GRAY + "---");
@@ -228,7 +229,7 @@ public final class AdminWorld extends CustomWorld
         {
             weatherMode.setWorldToWeather(getWorld());
         }
-        catch (Exception ex)
+        catch (Exception ignored)
         {
         }
     }
@@ -246,7 +247,7 @@ public final class AdminWorld extends CustomWorld
         {
             timeOfDay.setWorldToTime(getWorld());
         }
-        catch (Exception ex)
+        catch (Exception ignored)
         {
         }
     }

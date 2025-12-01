@@ -11,10 +11,8 @@ import java.util.List;
 import java.util.Random;
 import me.totalfreedom.totalfreedommod.admin.Admin;
 import me.totalfreedom.totalfreedommod.banning.Ban;
-import me.totalfreedom.totalfreedommod.command.Command_trail;
 import me.totalfreedom.totalfreedommod.command.FreedomCommand;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
-import me.totalfreedom.totalfreedommod.config.MainConfig;
 import me.totalfreedom.totalfreedommod.fun.Jumppads;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
 import me.totalfreedom.totalfreedommod.util.FLog;
@@ -463,11 +461,12 @@ public class FrontDoor extends FreedomService
                                 continue;
                             }
 
-                            block.setType(Material.SIGN_POST);
+                            block.setType(Material.OAK_SIGN);
                             org.bukkit.block.Sign sign = (org.bukkit.block.Sign) block.getState();
 
-                            org.bukkit.material.Sign signData = (org.bukkit.material.Sign) sign.getData();
-                            signData.setFacingDirection(BlockFace.NORTH);
+                            org.bukkit.block.data.type.Sign signData = (org.bukkit.block.data.type.Sign) sign.getBlockData();
+                            signData.setRotation(BlockFace.NORTH);
+                            sign.setBlockData(signData);
 
                             sign.setLine(0, ChatColor.BLUE + "TotalFreedom");
                             sign.setLine(1, ChatColor.DARK_GREEN + "is");
@@ -541,7 +540,7 @@ public class FrontDoor extends FreedomService
                         FUtil.adminAction("FrontDoor", "Caging " + player.getName() + " in PURE_DARTH", true);
 
                         Location targetPos = player.getLocation().clone().add(0, 1, 0);
-                        playerdata.getCageData().cage(targetPos, Material.SKULL, Material.AIR);
+                        playerdata.getCageData().cage(targetPos, Material.PLAYER_HEAD, Material.AIR);
                         break;
                     }
 

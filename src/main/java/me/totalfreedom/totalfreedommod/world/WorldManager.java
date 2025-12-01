@@ -85,7 +85,7 @@ public class WorldManager extends FreedomService
                 return;
             }
         }
-        catch (IllegalArgumentException ex)
+        catch (IllegalArgumentException ignored)
         {
         }
 
@@ -102,7 +102,7 @@ public class WorldManager extends FreedomService
                 return;
             }
         }
-        catch (Exception ex)
+        catch (Exception ignored)
         {
         }
 
@@ -142,7 +142,7 @@ public class WorldManager extends FreedomService
         if (player.getWorld().getName().equalsIgnoreCase(targetWorld))
         {
             playerMsg(player, "Going to main world.", ChatColor.GRAY);
-            player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+            player.teleport(Bukkit.getWorlds().getFirst().getSpawnLocation());
             return;
         }
 

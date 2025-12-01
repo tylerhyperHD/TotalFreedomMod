@@ -54,8 +54,26 @@ public class InteractBlocker extends FreedomService
     private void handleRightClick(PlayerInteractEvent event)
     {
         final Player player = event.getPlayer();
+        final Material material = event.getMaterial();
 
-        switch (event.getMaterial())
+        // Check if material is any type of sign
+        if (material == Material.OAK_SIGN || material == Material.OAK_WALL_SIGN ||
+            material == Material.SPRUCE_SIGN || material == Material.SPRUCE_WALL_SIGN ||
+            material == Material.BIRCH_SIGN || material == Material.BIRCH_WALL_SIGN ||
+            material == Material.JUNGLE_SIGN || material == Material.JUNGLE_WALL_SIGN ||
+            material == Material.ACACIA_SIGN || material == Material.ACACIA_WALL_SIGN ||
+            material == Material.DARK_OAK_SIGN || material == Material.DARK_OAK_WALL_SIGN ||
+            material == Material.CRIMSON_SIGN || material == Material.CRIMSON_WALL_SIGN ||
+            material == Material.WARPED_SIGN || material == Material.WARPED_WALL_SIGN ||
+            material == Material.MANGROVE_SIGN || material == Material.MANGROVE_WALL_SIGN ||
+            material == Material.CHERRY_SIGN || material == Material.CHERRY_WALL_SIGN ||
+            material == Material.BAMBOO_SIGN || material == Material.BAMBOO_WALL_SIGN)
+        {
+            player.sendMessage(ChatColor.GRAY + "Sign interaction is currently disabled.");
+            return;
+        }
+
+        switch (material)
         {
             case WATER_BUCKET:
             {
@@ -83,7 +101,7 @@ public class InteractBlocker extends FreedomService
                 break;
             }
 
-            case EXPLOSIVE_MINECART:
+            case TNT_MINECART:
             {
                 if (ConfigEntry.ALLOW_TNT_MINECARTS.getBoolean())
                 {
@@ -93,14 +111,6 @@ public class InteractBlocker extends FreedomService
                 player.getInventory().clear(player.getInventory().getHeldItemSlot());
                 player.sendMessage(ChatColor.GRAY + "TNT minecarts are currently disabled.");
                 event.setCancelled(true);
-                break;
-            }
-
-            case SIGN:
-            case SIGN_POST:
-            case WALL_SIGN:
-            {
-                player.sendMessage(ChatColor.GRAY + "Sign interaction is currently disabled.");
                 break;
             }
         }

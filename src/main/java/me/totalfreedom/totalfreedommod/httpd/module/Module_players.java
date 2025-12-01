@@ -6,8 +6,8 @@ import me.totalfreedom.totalfreedommod.httpd.NanoHTTPD;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class Module_players extends HTTPDModule
 {
@@ -18,7 +18,6 @@ public class Module_players extends HTTPDModule
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public NanoHTTPD.Response getResponse()
     {
         final JSONObject responseObject = new JSONObject();
@@ -33,10 +32,10 @@ public class Module_players extends HTTPDModule
         // All online players
         for (Player player : Bukkit.getOnlinePlayers())
         {
-            players.add(player.getName());
+            players.put(player.getName());
             if (plugin.al.isAdmin(player) && !plugin.al.isAdminImpostor(player))
             {
-                onlineadmins.add(player.getName());
+                onlineadmins.put(player.getName());
             }
         }
 
@@ -48,19 +47,19 @@ public class Module_players extends HTTPDModule
             switch (admin.getRank())
             {
                 case SUPER_ADMIN:
-                    superadmins.add(username);
+                    superadmins.put(username);
                     break;
                 case TELNET_ADMIN:
-                    telnetadmins.add(username);
+                    telnetadmins.put(username);
                     break;
                 case SENIOR_ADMIN:
-                    senioradmins.add(username);
+                    senioradmins.put(username);
                     break;
             }
         }
 
         // Developers
-        developers.addAll(FUtil.DEVELOPERS);
+        developers.put(FUtil.DEVELOPERS);
 
         responseObject.put("players", players);
         responseObject.put("onlineadmins", onlineadmins);

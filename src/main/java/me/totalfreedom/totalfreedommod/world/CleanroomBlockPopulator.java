@@ -18,11 +18,14 @@
 package me.totalfreedom.totalfreedommod.world;
 
 import java.util.Random;
-import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.generator.BlockPopulator;
+import org.bukkit.generator.LimitedRegion;
+import org.bukkit.generator.WorldInfo;
+import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("deprecation")
 public class CleanroomBlockPopulator extends BlockPopulator
 {
 
@@ -34,14 +37,14 @@ public class CleanroomBlockPopulator extends BlockPopulator
     }
 
     @Override
-    public void populate(World world, Random random, Chunk chunk)
+    public void populate(@NotNull WorldInfo worldInfo, @NotNull Random random, int chunkX, int chunkZ, @NotNull LimitedRegion limitedRegion)
     {
         if (layerDataValues != null)
         {
-            int x = chunk.getX() << 4;
-            int z = chunk.getZ() << 4;
+            int x = chunkX << 4;
+            int z = chunkZ << 4;
 
-            for (int y = 0; y < layerDataValues.length; y++)
+            for (int y = worldInfo.getMinHeight(); y < worldInfo.getMaxHeight() && y < layerDataValues.length; y++)
             {
                 byte dataValue = layerDataValues[y];
                 if (dataValue == 0)
@@ -52,7 +55,16 @@ public class CleanroomBlockPopulator extends BlockPopulator
                 {
                     for (int zz = 0; zz < 16; zz++)
                     {
-                        world.getBlockAt(x + xx, y, z + zz).setData(dataValue);
+                        int blockX = x + xx;
+                        int blockZ = z + zz;
+                        if (limitedRegion.isInRegion(blockX, y, blockZ))
+                        {
+                            BlockData blockData = limitedRegion.getBlockData(blockX, y, blockZ);
+                            if (blockData.getMaterial() != Material.AIR)
+                            {
+                                limitedRegion.setBlockData(blockX, y, blockZ, blockData.getMaterial().createBlockData());
+                            }
+                        }
                     }
                 }
             }

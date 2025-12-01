@@ -29,14 +29,16 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.generator.WorldInfo;
+import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("deprecation")
 public class CleanroomChunkGenerator extends ChunkGenerator
 {
 
     private static final Logger log = Bukkit.getLogger();
     private short[] layer;
     private byte[] layerDataValues;
+    private boolean generateBedrockLayer;
 
     public CleanroomChunkGenerator()
     {
@@ -54,18 +56,20 @@ public class CleanroomChunkGenerator extends ChunkGenerator
                 layer = new short[128]; // Default to 128, will be resized later if required
                 layerDataValues = null;
 
-                if ((id.length() > 0) && (id.charAt(0) == '.')) // Is the first character a '.'? If so, skip bedrock generation.
+                if ((!id.isEmpty()) && (id.charAt(0) == '.')) // Is the first character a '.'? If so, skip bedrock generation.
                 {
                     id = id.substring(1); // Skip bedrock then and remove the .
+                    generateBedrockLayer = false;
                 }
                 else // Guess not, bedrock at layer0 it is then.
                 {
-                    layer[y++] = (short) Material.BEDROCK.getId();
+                    layer[y++] = (short) Material.BEDROCK.ordinal();
+                    generateBedrockLayer = true;
                 }
 
-                if (id.length() > 0)
+                if (!id.isEmpty())
                 {
-                    String tokens[] = id.split("[,]");
+                    String[] tokens = id.split(",");
 
                     if ((tokens.length % 2) != 0)
                     {
@@ -81,7 +85,7 @@ public class CleanroomChunkGenerator extends ChunkGenerator
                             height = 64;
                         }
 
-                        String materialTokens[] = tokens[i + 1].split("[:]", 2);
+                        String[] materialTokens = tokens[i + 1].split(":", 2);
                         byte dataValue = 0;
                         if (materialTokens.length == 2)
                         {
@@ -93,27 +97,13 @@ public class CleanroomChunkGenerator extends ChunkGenerator
                             catch (Exception e)
                             {
                                 log.warning("[CleanroomGenerator] Invalid Data Value '" + materialTokens[1] + "'. Defaulting to 0.");
-                                dataValue = 0;
                             }
                         }
                         Material mat = Material.matchMaterial(materialTokens[0]);
                         if (mat == null)
                         {
-                            try
-                            {
-                                // Mabe it's an integer?
-                                mat = Material.getMaterial(Integer.parseInt(materialTokens[0]));
-                            }
-                            catch (Exception e)
-                            {
-                                // Well, I guess it wasn't an integer after all... Awkward...
-                            }
-
-                            if (mat == null)
-                            {
-                                log.warning("[CleanroomGenerator] Invalid Block ID '" + materialTokens[0] + "'. Defaulting to stone.");
-                                mat = Material.STONE;
-                            }
+                            log.warning("[CleanroomGenerator] Invalid Block ID '" + materialTokens[0] + "'. Defaulting to stone.");
+                            mat = Material.STONE;
                         }
 
                         if (!mat.isBlock())
@@ -135,7 +125,7 @@ public class CleanroomChunkGenerator extends ChunkGenerator
                             }
                         }
 
-                        Arrays.fill(layer, y, y + height, (short) mat.getId());
+                        Arrays.fill(layer, y, y + height, (short) mat.ordinal());
                         if (dataValue != 0)
                         {
                             if (layerDataValues == null)
@@ -168,49 +158,87 @@ public class CleanroomChunkGenerator extends ChunkGenerator
                 e.printStackTrace();
                 layerDataValues = null;
                 layer = new short[65];
-                layer[0] = (short) Material.BEDROCK.getId();
-                Arrays.fill(layer, 1, 65, (short) Material.STONE.getId());
+                layer[0] = (short) Material.BEDROCK.ordinal();
+                Arrays.fill(layer, 1, 65, (short) Material.STONE.ordinal());
+                generateBedrockLayer = true;
             }
         }
         else
         {
             layerDataValues = null;
             layer = new short[65];
-            layer[0] = (short) Material.BEDROCK.getId();
-            Arrays.fill(layer, 1, 65, (short) Material.STONE.getId());
+            layer[0] = (short) Material.BEDROCK.ordinal();
+            Arrays.fill(layer, 1, 65, (short) Material.STONE.ordinal());
+            generateBedrockLayer = true;
         }
     }
 
     @Override
-    public short[][] generateExtBlockSections(World world, Random random, int x, int z, BiomeGrid biomes)
+    public void generateBedrock(@NotNull WorldInfo worldInfo, @NotNull Random random, int chunkX, int chunkZ, @NotNull ChunkData chunkData)
     {
-        int maxHeight = world.getMaxHeight();
+        if (!generateBedrockLayer || layer.length == 0)
+        {
+            return;
+        }
+
+        int maxHeight = worldInfo.getMaxHeight();
+        int minHeight = worldInfo.getMinHeight();
+
+        // Only generate bedrock at y=0 (or minHeight if it's higher)
+        int bedrockY = Math.max(minHeight, 0);
+        if (bedrockY < maxHeight && layer[0] == (short) Material.BEDROCK.ordinal())
+        {
+            for (int x = 0; x < 16; x++)
+            {
+                for (int z = 0; z < 16; z++)
+                {
+                    chunkData.setBlock(x, bedrockY, z, Material.BEDROCK);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void generateNoise(@NotNull WorldInfo worldInfo, @NotNull Random random, int chunkX, int chunkZ, @NotNull ChunkData chunkData)
+    {
+        int maxHeight = worldInfo.getMaxHeight();
+        int minHeight = worldInfo.getMinHeight();
+
         if (layer.length > maxHeight)
         {
             log.warning("[CleanroomGenerator] Error, chunk height " + layer.length + " is greater than the world max height (" + maxHeight + "). Trimming to world max height.");
             short[] newLayer = new short[maxHeight];
-            arraycopy(layer, 0, newLayer, 0, maxHeight);
+            arraycopy(layer, 0, newLayer, 0, Math.min(layer.length, maxHeight));
             layer = newLayer;
         }
-        short[][] result = new short[maxHeight / 16][]; // 16x16x16 chunks
-        for (int i = 0; i < layer.length; i += 16)
+
+        // Start from 1 if bedrock is at index 0, otherwise start from 0
+        int startY = (generateBedrockLayer && layer.length > 0 && layer[0] == (short) Material.BEDROCK.ordinal()) ? 1 : 0;
+
+        for (int y = Math.max(minHeight, startY); y < layer.length && y < maxHeight; y++)
         {
-            result[i >> 4] = new short[4096];
-            for (int y = 0; y < Math.min(16, layer.length - i); y++)
+            Material material = Material.values()[layer[y]];
+            // Skip bedrock as it's handled in generateBedrock()
+            if (y == 0 && material == Material.BEDROCK)
             {
-                Arrays.fill(result[i >> 4], y * 16 * 16, (y + 1) * 16 * 16, layer[i + y]);
+                continue;
+            }
+            for (int x = 0; x < 16; x++)
+            {
+                for (int z = 0; z < 16; z++)
+                {
+                    chunkData.setBlock(x, y, z, material);
+                }
             }
         }
-
-        return result;
     }
 
     @Override
-    public List<BlockPopulator> getDefaultPopulators(World world)
+    public @NotNull List<BlockPopulator> getDefaultPopulators(@NotNull World world)
     {
         if (layerDataValues != null)
         {
-            return Arrays.asList((BlockPopulator) new CleanroomBlockPopulator(layerDataValues));
+            return List.of((BlockPopulator) new CleanroomBlockPopulator(layerDataValues));
         }
         else
         {
@@ -220,7 +248,7 @@ public class CleanroomChunkGenerator extends ChunkGenerator
     }
 
     @Override
-    public Location getFixedSpawnLocation(World world, Random random)
+    public Location getFixedSpawnLocation(World world, @NotNull Random random)
     {
         if (!world.isChunkLoaded(0, 0))
         {

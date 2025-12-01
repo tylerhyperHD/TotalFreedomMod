@@ -2,11 +2,12 @@ package me.totalfreedom.totalfreedommod.command;
 
 import java.util.List;
 import me.totalfreedom.totalfreedommod.rank.Rank;
-import me.totalfreedom.totalfreedommod.util.DepreciationAggregator;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Switch;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -63,10 +64,13 @@ public class Command_setlever extends FreedomCommand
 
         if (targetBlock.getType() == Material.LEVER)
         {
-            org.bukkit.material.Lever lever = DepreciationAggregator.makeLeverWithData(DepreciationAggregator.getData_Block(targetBlock));
-            lever.setPowered(leverOn);
-            DepreciationAggregator.setData_Block(targetBlock, DepreciationAggregator.getData_MaterialData(lever));
-            targetBlock.getState().update();
+            BlockData blockData = targetBlock.getBlockData();
+            if (blockData instanceof Switch)
+            {
+                Switch lever = (Switch) blockData;
+                lever.setPowered(leverOn);
+                targetBlock.setBlockData(lever);
+            }
         }
         else
         {

@@ -247,8 +247,12 @@ public class RollbackManager extends FreedomService
                 + ChatColor.BLUE + ")" + ChatColor.WHITE + ":", ChatColor.BLUE);
         for (RollbackEntry entry : entries)
         {
-            FUtil.playerMsg(player, " - " + ChatColor.BLUE + entry.author + " " + entry.getType() + " "
-                    + StringUtils.capitalize(entry.getMaterial().toString().toLowerCase()) + (entry.data == 0 ? "" : ":" + entry.data));
+            String blockInfo = StringUtils.capitalize(entry.getMaterial().toString().toLowerCase());
+            if (entry.blockDataString != null && !entry.blockDataString.isEmpty())
+            {
+                blockInfo += " [" + entry.blockDataString + "]";
+            }
+            FUtil.playerMsg(player, " - " + ChatColor.BLUE + entry.author + " " + entry.getType() + " " + blockInfo);
         }
     }
 

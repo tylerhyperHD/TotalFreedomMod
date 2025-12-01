@@ -6,7 +6,6 @@ import lombok.Getter;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
 
@@ -165,7 +164,7 @@ public class CageData
 
                     final Block block = center.getRelative(xOffset, yOffset, zOffset);
 
-                    if (material != Material.SKULL)
+                    if (material != Material.PLAYER_HEAD)
                     {
                         // Glowstone light
                         if (material != Material.GLASS && xOffset == 0 && yOffset == 2 && zOffset == 0)
@@ -184,10 +183,9 @@ public class CageData
                             continue;
                         }
 
-                        block.setType(Material.SKULL);
+                        block.setType(Material.PLAYER_HEAD);
                         final Skull skull = (Skull) block.getState();
-                        skull.setSkullType(SkullType.PLAYER);
-                        skull.setOwner("Prozza");
+                        skull.setOwningPlayer(org.bukkit.Bukkit.getOfflinePlayer("Prozza"));
                         skull.update();
                     }
                 }

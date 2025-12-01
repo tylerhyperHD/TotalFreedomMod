@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FLog;
-import org.apache.commons.lang.math.DoubleRange;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,7 +18,8 @@ public class Command_health extends FreedomCommand
 {
 
     private static final int BYTES_PER_MB = 1024 * 1024;
-    private static final DoubleRange TPS_RANGE = new DoubleRange(20.0 - 0.1, 20.0 + 0.1);
+    private static final double TPS_MIN = 19.9;
+    private static final double TPS_MAX = 20.1;
 
     @Override
     public boolean run(final CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
@@ -56,7 +56,7 @@ public class Command_health extends FreedomCommand
                         @Override
                         public void run()
                         {
-                            msg("Ticks per second: " + (TPS_RANGE.containsDouble(ticksPerSecond) ? ChatColor.GREEN : ChatColor.RED) + ticksPerSecond);
+                            msg("Ticks per second: " + (ticksPerSecond >= TPS_MIN && ticksPerSecond <= TPS_MAX ? ChatColor.GREEN : ChatColor.RED) + ticksPerSecond);
                         }
                     }.runTask(plugin);
                 }

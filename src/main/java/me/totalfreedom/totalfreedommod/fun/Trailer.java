@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.Set;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
-import me.totalfreedom.totalfreedommod.util.DepreciationAggregator;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -19,6 +18,12 @@ public class Trailer extends FreedomService
 
     private final Random random = new Random();
     private final Set<String> trailPlayers = new HashSet<>(); // player name
+    private static final Material[] WOOL_COLORS = {
+        Material.WHITE_WOOL, Material.ORANGE_WOOL, Material.MAGENTA_WOOL, Material.LIGHT_BLUE_WOOL,
+        Material.YELLOW_WOOL, Material.LIME_WOOL, Material.PINK_WOOL, Material.GRAY_WOOL,
+        Material.LIGHT_GRAY_WOOL, Material.CYAN_WOOL, Material.PURPLE_WOOL, Material.BLUE_WOOL,
+        Material.BROWN_WOOL, Material.GREEN_WOOL, Material.RED_WOOL, Material.BLACK_WOOL
+    };
 
     public Trailer(TotalFreedomMod plugin)
     {
@@ -60,8 +65,7 @@ public class Trailer extends FreedomService
             return;
         }
 
-        fromBlock.setType(Material.WOOL);
-        DepreciationAggregator.setData_Block(fromBlock, (byte) random.nextInt(16));
+        fromBlock.setType(WOOL_COLORS[random.nextInt(WOOL_COLORS.length)]);
     }
 
     public void remove(Player player)

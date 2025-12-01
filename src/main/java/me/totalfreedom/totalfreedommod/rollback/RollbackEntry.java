@@ -1,11 +1,11 @@
 package me.totalfreedom.totalfreedommod.rollback;
 
-import me.totalfreedom.totalfreedommod.util.DepreciationAggregator;
 import me.totalfreedom.totalfreedommod.util.FLog;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 
 public class RollbackEntry
 {
@@ -16,7 +16,7 @@ public class RollbackEntry
     public final int x;
     public final short y;
     public final int z;
-    public final byte data;
+    public final String blockDataString;
     public final Material blockMaterial;
     private final boolean isBreak;
 
@@ -33,13 +33,13 @@ public class RollbackEntry
         if (entryType == EntryType.BLOCK_BREAK)
         {
             this.blockMaterial = block.getType();
-            this.data = DepreciationAggregator.getData_Block(block);
+            this.blockDataString = block.getBlockData().getAsString();
             this.isBreak = true;
         }
         else
         {
             this.blockMaterial = block.getType();
-            this.data = DepreciationAggregator.getData_Block(block);
+            this.blockDataString = block.getBlockData().getAsString();
             this.isBreak = false;
         }
     }
@@ -72,8 +72,8 @@ public class RollbackEntry
         final Block block = Bukkit.getWorld(worldName).getBlockAt(x, y, z);
         if (isBreak)
         {
-            block.setType(getMaterial());
-            DepreciationAggregator.setData_Block(block, data);
+            BlockData blockData = Bukkit.createBlockData(blockDataString);
+            block.setBlockData(blockData);
         }
         else
         {
@@ -91,8 +91,8 @@ public class RollbackEntry
         }
         else
         {
-            block.setType(getMaterial());
-            DepreciationAggregator.setData_Block(block, data);
+            BlockData blockData = Bukkit.createBlockData(blockDataString);
+            block.setBlockData(blockData);
         }
     }
 }
